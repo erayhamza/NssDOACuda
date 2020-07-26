@@ -1,7 +1,7 @@
 # NssDOACuda
 Noise Subspace(NSS)-based DOA Estimation Algorithms on GPU using CUDA
 
-Most popular algorithms in this famiy are named as follows.  
+Most popular algorithms in this family are named as follows.  
 * PHD (Pisarenko Harmonic Decomposition)
 *	MUSIC (MUltiple SIgnal Classification)
 *	EV (Eigen Vector)
