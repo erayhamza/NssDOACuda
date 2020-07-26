@@ -23,7 +23,7 @@ A specific DOA test scenario has been designed for numerical validation and expe
 
 ## Requirements
 
-This implementation uses Eigen template library for some host-side linear algebra operations. However, depending on the version, the content of Eigen library sometimes conflicts with CUDA toolkit and this may require additional effort for discarding some unused folders from the root Eigen library or for doing some additional Visual Studio project settings.    
+This implementation uses Eigen template library for some host-side linear algebra operations. However, depending on the version, the content of Eigen library sometimes conflicts with CUDA toolkit and this may require an additional effort for discarding some unused folders from the root Eigen library or for doing some additional Visual Studio project settings.    
 
 
 ## Commands
