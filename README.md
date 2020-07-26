@@ -38,7 +38,7 @@ nvcc .\MUSIC_cuda.cu
 
 CUDA code running after compilation:
 
-.\*.out file is run after making input data available to the code path 
+newly created *.out file in the folder is run after making input data available to the code path 
 
 
 
