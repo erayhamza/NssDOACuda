@@ -1,13 +1,15 @@
 # NssDOACuda
 Noise Subspace(NSS)-based DOA Estimation Algorithms on GPU using CUDA
 
-This repository contains the following codes belonging to four NSS-DOA algorithms: 
+Most popular algorithms in this famiy are named as follows.  
 * PHD (Pisarenko Harmonic Decomposition)
 *	MUSIC (MUltiple SIgnal Classification)
 *	EV (Eigen Vector)
 *	MN (Minimum Norm) 
 
-They are companion codes for the following preprint:
+Since they are similar to each other in terms of numerical & duration performance, only the MUSIC algorithm is provided within this repository.
+
+The companion MUSIC code is provided for the following preprint:
 
 * name & arXiv link are to be added after arXiv uploading *
 
@@ -19,21 +21,25 @@ A specific DOA test scenario has been designed for numerical validation and expe
   <img src="https://github.com/erayhamza/NssDOACuda/blob/master/images/TestScenario.JPG" width="500" height="auto">
 </p>
 
+## Requirements
+
+This implementation uses Eigen template library for some host-side linear algebra operations. However, depending on the version, the content of Eigen library sometimes conflicts with CUDA toolkit and this may require additional effort for discarding some unused folders from the root Eigen library or for doing some additional Visual Studio project settings.    
+
+
 ## Commands
 
 _Note: These implementations require NVIDIA CUDA Toolkit (tested with version 10.1) to be installed on the machine._
 
-To compile:
+CUDA code compilation after setting some parameters & editing the related information about the input data :
 
 ```
-All nvcc-based compile commands are to be added 
+nvcc .\MUSIC_cuda.cu
 ```
 
-To run:
+CUDA code running after compilation:
 
-```
-All run commands from out files are to be added  
-```
+.\*.out file is run after making input data available to the code path 
+
 
 
 ## Citation
