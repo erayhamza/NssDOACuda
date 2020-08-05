@@ -11,7 +11,9 @@ Since they are similar to each other in terms of numerical & duration performanc
 
 The companion MUSIC code is provided for the following preprint:
 
-* name & arXiv link are to be added after arXiv uploading *
+*H. Eray, A. Temizel, “Performance Analysis of Noise Subspace-based Narrowband Direction-of-Arrival (DOA) Estimation Algorithms on CPU and GPU”, arXiv:2007.14135, July 2020.*
+
+https://arxiv.org/abs/2007.14135
 
 ## Test Scenario 
 
@@ -30,7 +32,7 @@ This implementation uses Eigen template library for some host-side linear algebr
 
 _Note: These implementations require NVIDIA CUDA Toolkit (tested with version 10.1) to be installed on the machine._
 
-CUDA code compilation after setting some parameters & editing the related information about the input data :
+CUDA code compilation can be done by the following after setting some parameters & entering input data path in the code:
 
 ```
 nvcc .\MUSIC_cuda.cu
@@ -46,18 +48,24 @@ newly created *.out file in the folder is run after making input data available 
 
 If you use this code, please cite the paper using the reference below:
 
-> Citation info is to be added 
+> H. Eray, A. Temizel, “Performance Analysis of Noise Subspace-based Narrowband Direction-of-Arrival (DOA) Estimation Algorithms on CPU and GPU”, arXiv:2007.14135, July 2020. 
 
 BibTeX entry:
 
 ```
-BibTeX info is to be added 
+@article{nssdoacuda,
+title = {Performance Analysis of Noise Subspace-based Narrowband Direction-of-Arrival (DOA) Estimation Algorithms on CPU and GPU},
+author = {Hamza Eray and Alptekin Temizel},
+journal = {arXiv e-prints arXiv:2007.14135},
+year = {2020},
+}
 ```
 
 
 
 ## Credits
 
-Inria TUX Family - Eigen template library (used in most of the linear algebra operations) :
+Inria TUX Family - Eigen template library (used in most of the linear algebra operations on the host(CPU) side):
 
+*http://eigen.tuxfamily.org*
 *https://gitlab.com/libeigen/eigen*
