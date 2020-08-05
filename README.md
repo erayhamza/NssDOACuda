@@ -67,5 +67,5 @@ year = {2020},
 
 Inria TUX Family - Eigen template library (used in most of the linear algebra operations on the host(CPU) side):
 
-*http://eigen.tuxfamily.org*
-*https://gitlab.com/libeigen/eigen*
+* *http://eigen.tuxfamily.org*
+* *https://gitlab.com/libeigen/eigen*
