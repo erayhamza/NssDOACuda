@@ -1,6 +1,7 @@
 /*
- * CUDA implementation of MUSIC
- * written by : Hamza ERAY
+ * CUDA implementation of MUSIC DOA Estimation algorithm 
+ * Hamza ERAY
+ * Graduate School of Informatics - METU
  */
 
 #include <stdio.h>
@@ -19,8 +20,8 @@
 #include <iostream>
 #include <complex>
 #include <vector>
-#include "/Eigen/Dense"
-#include "./Eigen/Core" 
+#include "Eigen/Dense"
+#include "Eigen/Core" 
 #include <chrono>
 #include <omp.h>
 #include <cuComplex.h>	
@@ -175,7 +176,7 @@ int main(int argc, char*argv[])
 
 	int numberOfThreads = omp_get_max_threads() / 4;
 
-	omp_set_num_threads(numberOfThreads);
+	omp_set_num_threads(numberOfThreads); // set number of OpenMP threads (host side)
 
 	std::cout << "Algorithm Properties:" << std::endl;
 	std::cout << "Number of threads used by Eigen:" << Eigen::nbThreads() << std::endl;
@@ -183,23 +184,24 @@ int main(int argc, char*argv[])
 
 	// General parameters
 	const int N = 1000; // number of samples
-	int D = 2; // # of DirectPaths
+	int D = 2; // number of direct paths
 
+    // SVD-related variables  
 	const int m = M;
 	const int n = M;
 	const int lda = m;
 
-	int BLKSIZE = 32;   
+	int BLKSIZE = 32; // block size (of CUDA threads)      
 
 	
-	float SignalFreqs = 15e6f; // carrier freq
+	float SignalFreqs = 15e6f; // RF carrier signal frequency
 	
 	float delta = 1.0f; // Azim/Elev angle step size
 
 	
-	float Start_Angle_A = 0.0f, Stop_Angle_A = 359.0f; // azimuth start & stop 
+	float Start_Angle_A = 0.0f, Stop_Angle_A = 359.0f; // azimuth start & stop angle
 
-	float Start_Angle_E = 01.0f, Stop_Angle_E = 90.0f; // elevation start & stop 
+	float Start_Angle_E = 01.0f, Stop_Angle_E = 90.0f; // elevation start & stop angle 
 
 		
 	const int n_azim = int((Stop_Angle_A - Start_Angle_A) / delta + 1);
@@ -215,7 +217,7 @@ int main(int argc, char*argv[])
 	
 	// Reading antenna positions
 	Eigen::VectorXf X_rand(M), Y_rand(M), Z_rand(M);
-	readAntennaPositions((char*)"TestData/ArrayPositions_Circ10m.txt", X_rand, Y_rand, Z_rand); // Change here with file name accordingly
+	readAntennaPositions((char*)"TestData/ArrayPositions_Circ10m.txt", X_rand, Y_rand, Z_rand); // change here with your config file name 
 	std::cout << "antLoc read successful "  << std::endl;
 
 	/*
@@ -229,7 +231,7 @@ int main(int argc, char*argv[])
 		X_prev.push_back(std::vector<std::complex<float>>(M));
 	}
 
-	X_prev = LoadSignal((char*)"TestData/TestSignal_AWGN_15dB_150200_9090.txt", M, N);
+	X_prev = LoadSignal((char*)"TestData/TestSignal_AWGN_15dB_150200_9090.txt", M, N); // change here with your test signal file name
 
 	
 
@@ -263,6 +265,9 @@ int main(int argc, char*argv[])
 	Eigen::VectorXf elevation_results;
 	Eigen::VectorXf peak_values;
 
+    /*
+	 *  Uncomment here if you want to export MUSIC pseudo-spectrum values to a text file   
+	 */ 
 	/*std::ofstream music_cost;
 	std::string filenameCost = "musicCost_" + std::to_string(N) + "Azimuth_" + std::to_string(Start_Angle_A) + "_" + std::to_string(Stop_Angle_A) + "Elevation_" + std::to_string(Start_Angle_E) + "_" + std::to_string(Stop_Angle_E) + ".txt";
 	music_cost.open(filenameCost, std::fstream::app);*/
@@ -767,7 +772,7 @@ int main(int argc, char*argv[])
 	}
 
 	/*
-	 *  TODO : can be removed after numerical precision test is done
+	 *  Uncomment if you want to realize numerical precision test (via exporting into a text file)
 	 */
 
 	/*
@@ -910,7 +915,7 @@ LoadSignal(char * sFileN, int SRow, int SCol)
 	errno_t err;
 	std::vector< std::vector<std::complex<float>>> n;
 
-	for (int cc = 0; cc < SRow; ++cc)
+	for (int rwInd = 0; rwInd < SRow; ++rwInd)
 	{
 		n.push_back(std::vector<std::complex<float>>(SCol));
 	}
@@ -1061,9 +1066,9 @@ Eigen::VectorXf fpeaks2D(Eigen::MatrixXf PP, float perc, Eigen::VectorXf &rowLoc
 
 
 /*
-Sorts the df logs peak values from high to low.
-Returns maximum of D count of peaks
-*/
+ * Sorts the DF logs peak values from high to low.
+ * Returns maximum of D count of peaks
+ */
 Eigen::VectorXf sort_peaks(Eigen::VectorXf peaks, Eigen::VectorXf & rowLocs, Eigen::VectorXf & colLocs, int D)
 {
 	Eigen::VectorXf colLocs_temp = colLocs;
