@@ -60,12 +60,10 @@ __global__ void MUSIC_kernel(cuFloatComplex *C_d_,
 
 	int idx, idy; // 2D-grid-compliant global thread indices
 	int idGlb_1D = blockIdx.x * blockDim.x + threadIdx.x; // global 1D index for 2D -> 1D grid structure
-														  // azim & elev local indices by extracting idx & idy <-- 1D grid structure , idGlb_1D  
-														  // extract idx & idy from ( idGlb_1D = idx + idy * n_azim_ ) 
+        
+	// azim & elev local indices by extracting idx & idy <-- 1D grid structure , idGlb_1D  
+	// extract idx & idy from ( idGlb_1D = idx + idy * n_azim_ ) 
 	idx = (idGlb_1D % n_azim_);   idy = (int)(idGlb_1D / n_azim_);
-
-
-
 
 
 	/*Optim-step2 : Keeping the re-usable arrays in local memory
@@ -84,17 +82,13 @@ __global__ void MUSIC_kernel(cuFloatComplex *C_d_,
 	{
 
 
-		//printf("thread (%d,%d): i am live \n", idx, idy);
+		// printf("thread (%d,%d): i am alive \n", idx, idy); // activity check 
 		
-
 
 		// Common in-pass indexing for readibility &  better performance 
 
 		int sclrInd = idx * 1 * 1 + idy * 1 * 1 * n_azim_; // single-pass scalar variable indexing, used for : invP_table_d , P_table_d
 		int M_1_ind = idx * M * 1 + idy * M * 1 * n_azim_; // single-pass Mx1 array indexing, used for : A_table_d, invPrhs_table_d  
-
-		//int M_M_ind = idx * M*M + idy * M*M*n_azim_; // single-pass MxM array indexing, used for : pi_A_perp_table,trace_Inside, P_Hat_LHS_2, detIn1, det2D
-
 
 		
 		/*
@@ -158,12 +152,10 @@ __global__ void MUSIC_kernel(cuFloatComplex *C_d_,
 
 
 		/*
-		 *    P = 1/ invP.real()
+		 *    Operation for P = 1/ invP.real()
 		 */
 
 		P_table_d_[sclrInd] = 1 / invP_table_d_[sclrInd].x;
-
-		//P_table_d_[sclrInd] = invP_table_d_[sclrInd].x;
 		
 	}
 
@@ -186,7 +178,7 @@ int main(int argc, char*argv[])
 	const int N = 1000; // number of samples
 	int D = 2; // number of direct paths
 
-    // SVD-related variables  
+        // SVD-related matrix size variables  
 	const int m = M;
 	const int n = M;
 	const int lda = m;
@@ -204,20 +196,20 @@ int main(int argc, char*argv[])
 	float Start_Angle_E = 01.0f, Stop_Angle_E = 90.0f; // elevation start & stop angle 
 
 		
-	const int n_azim = int((Stop_Angle_A - Start_Angle_A) / delta + 1);
-	const int n_elev = int((Stop_Angle_E - Start_Angle_E) / delta + 1);
+	const int n_azim = int((Stop_Angle_A - Start_Angle_A) / delta + 1); // number of azim angles
+	const int n_elev = int((Stop_Angle_E - Start_Angle_E) / delta + 1); // number of elev angles 
 	
 	Eigen::VectorXf azimuth_series(n_azim);
 	Eigen::VectorXf elevation_series(n_elev);
-	azimuth_series.setLinSpaced(n_azim, Start_Angle_A, Stop_Angle_A);
-	elevation_series.setLinSpaced(n_elev, Start_Angle_E, Stop_Angle_E);
+	azimuth_series.setLinSpaced(n_azim, Start_Angle_A, Stop_Angle_A); // linearly-spaced azim angle series  
+	elevation_series.setLinSpaced(n_elev, Start_Angle_E, Stop_Angle_E); // linearly-spaced elev angle series
 
 	std::cout << "n_azim: " <<  n_azim << std::endl << "n_elev: " << n_elev << std::endl;
 
 	
 	// Reading antenna positions
 	Eigen::VectorXf X_rand(M), Y_rand(M), Z_rand(M);
-	readAntennaPositions((char*)"TestData/ArrayPositions_Circ10m.txt", X_rand, Y_rand, Z_rand); // change here with your config file name 
+	readAntennaPositions((char*)"TestData/ArrayPositions_Circ10m.txt", X_rand, Y_rand, Z_rand); // change here with your antenna config file name 
 	std::cout << "antLoc read successful "  << std::endl;
 
 	/*
@@ -231,7 +223,7 @@ int main(int argc, char*argv[])
 		X_prev.push_back(std::vector<std::complex<float>>(M));
 	}
 
-	X_prev = LoadSignal((char*)"TestData/TestSignal_AWGN_15dB_150200_9090.txt", M, N); // change here with your test signal file name
+	X_prev = LoadSignal((char*)"TestData/TestSignal_AWGN_15dB_150200_9090.txt", M, N); // change here with your input test signal file name
 
 	
 
@@ -246,7 +238,7 @@ int main(int argc, char*argv[])
 	}
 
 
-	
+	// Timing text file creation 
 	std::ofstream timerFile;
 	std::string filename ="BLKsize"+ std::to_string(BLKSIZE) +  "_timerCUDA_N_" + std::to_string(N) + "Azimuth_" + std::to_string(int(Start_Angle_A)) + "_" +
 	std::to_string(int(Stop_Angle_A)) + "Elevation_" + std::to_string(int(Start_Angle_E)) + "_" +
@@ -265,14 +257,16 @@ int main(int argc, char*argv[])
 	Eigen::VectorXf elevation_results;
 	Eigen::VectorXf peak_values;
 
-    /*
+        /*
 	 *  Uncomment here if you want to export MUSIC pseudo-spectrum values to a text file   
 	 */ 
 	/*std::ofstream music_cost;
 	std::string filenameCost = "musicCost_" + std::to_string(N) + "Azimuth_" + std::to_string(Start_Angle_A) + "_" + std::to_string(Stop_Angle_A) + "Elevation_" + std::to_string(Start_Angle_E) + "_" + std::to_string(Stop_Angle_E) + ".txt";
 	music_cost.open(filenameCost, std::fstream::app);*/
 	
-
+         /*
+	  * Average run time is computed using 1000 run samples(named as iterations)  
+ 	  */
 
 	for (int iteration = 0; iteration < numOfIteration; iteration++) {
 
@@ -514,7 +508,7 @@ int main(int argc, char*argv[])
 
 
 	/*
-	 * Signal-Noise Subspace Selection
+	 * Signal Subspace / Noise Subspace Selection
 	 */
 
 	auto startNSS = std::chrono::high_resolution_clock::now();
@@ -570,10 +564,9 @@ int main(int argc, char*argv[])
 	auto startArrPrep = std::chrono::high_resolution_clock::now();
 		
 	/*
-	 * Step1: Generation of the Array Manifold via Steering vectors
-	 *
-	 * Step2: Constructing the reusable A_table for all CUDA threads
-	 *
+	 * Generation of the Array Manifold via Steering vectors
+	 * && 
+	 * Constructing the reusable A_table for all CUDA threads
 	 */
 
 
@@ -692,10 +685,10 @@ int main(int argc, char*argv[])
 	
 
 	/*
-	 * Kernel Configuration
+	 *  MUSIC kernel-configuration
 	 */
 
-	int TotalScan = n_azim * n_elev;
+	int TotalScan = n_azim * n_elev; // total number of active threads to be spawn
  
 	int blNum = (TotalScan) / BLKSIZE + (TotalScan % BLKSIZE == 0 ? 0 : 1);
 
@@ -708,7 +701,9 @@ int main(int argc, char*argv[])
 	// start the timer for MUSIC kernel  
 	cudaEventRecord(startKernel, 0);
 		
-
+        /*
+	 *  MUSIC kernel-launch with preferred configuration 
+	 */    
 	MUSIC_kernel << < blNum, BLKSIZE >> > (C_d, A_table_d,
 		invPrhs_table_d, invP_table_d, P_table_d,
 		n_azim, n_elev, TotalScan);
@@ -880,12 +875,12 @@ int main(int argc, char*argv[])
 	cudaDeviceReset();
 	}
 
-
+	// averaging total durations for each step in the code flow   
 	tRavg = tRavg / float(numOfIteration);  tJSVDavg = tJSVDavg / float(numOfIteration);  tNSSavg = tNSSavg / float(numOfIteration); tAh2davg = tAh2davg / float(numOfIteration);
 	tArrprepavg = tArrprepavg/float(numOfIteration);  tAllavg = tAllavg / float(numOfIteration); tPd2havg = tPd2havg/ float(numOfIteration);  tFPKSavg = tFPKSavg / float(numOfIteration);
 
 
-
+        // Writing the average part-durations into the out stream initiated for the timing text file   
 	timerFile << "tR: " << tRavg << " usec " << std::endl
 		<< "tJSVD: " << tJSVDavg << " usec " << std::endl
 		<< "tNSS: " << tNSSavg << " usec " << std::endl
@@ -899,7 +894,9 @@ int main(int argc, char*argv[])
 	timerFile.close();
 
 
-
+        /*
+	 * Program finalization & algorithm result messages  
+	 */
 	std::cout << "Durations are recorded! " << std::endl;
 	std::cout << "Azimuth:" << azimuth_results.transpose() << std::endl;
 	std::cout << "Elevation:" << elevation_results.transpose() << std::endl;
@@ -919,10 +916,14 @@ LoadSignal(char * sFileN, int SRow, int SCol)
 	{
 		n.push_back(std::vector<std::complex<float>>(SCol));
 	}
-
+        
+	/*
+	 * temporary(empty) array & Real/Imaginary arrays 
+	 * their sizes are constant for now, to be changed to variables later  
+	 */
 	int Empty[8000];
 	float Real[8][1000];
-	float Image[8][1000];
+	float Imag[8][1000];
 
 
 	
@@ -939,9 +940,9 @@ LoadSignal(char * sFileN, int SRow, int SCol)
 				for (int cs = 0; cs < SCol; cs++)
 				{
 
-					fscanf_s(file, "%f\t%f", &Real[rs][cs], &Image[rs][cs]);
+					fscanf_s(file, "%f\t%f", &Real[rs][cs], &Imag[rs][cs]);
 
-					if (cs < 999)
+					if (cs < 999) // end of the line (set to N-1 value if N is not 1000)
 						fscanf_s(file, "\t\t", &Empty[i]);
 					i++;
 				}
@@ -956,7 +957,7 @@ LoadSignal(char * sFileN, int SRow, int SCol)
 
 	for (int Sum = 0; Sum < SRow; Sum++)
 		for (int sumR = 0; sumR < SCol; sumR++) {
-			n[Sum][sumR] = std::complex<float>(Real[Sum][sumR], Image[Sum][sumR]);
+			n[Sum][sumR] = std::complex<float>(Real[Sum][sumR], Imag[Sum][sumR]);
 		}
 
 	return n;
@@ -1066,7 +1067,7 @@ Eigen::VectorXf fpeaks2D(Eigen::MatrixXf PP, float perc, Eigen::VectorXf &rowLoc
 
 
 /*
- * Sorts the DF logs peak values from high to low.
+ * Sorts the DF log peak values from high value to low value.
  * Returns maximum of D count of peaks
  */
 Eigen::VectorXf sort_peaks(Eigen::VectorXf peaks, Eigen::VectorXf & rowLocs, Eigen::VectorXf & colLocs, int D)
